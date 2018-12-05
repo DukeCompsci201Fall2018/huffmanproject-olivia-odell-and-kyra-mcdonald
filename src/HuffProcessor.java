@@ -94,9 +94,6 @@ public class HuffProcessor {
 	 */
 	public void decompress(BitInputStream in, BitOutputStream out) {
 		int bits = in.readBits(BITS_PER_INT);
-		if (bits == -1) {
-			throw new HuffException("reading bits fails");
-		}
 		if (bits != HUFF_TREE) {
 			throw new HuffException("illegal header starts with " + bits);
 		}
@@ -113,26 +110,19 @@ public class HuffProcessor {
 	}
 
 	public HuffNode readTreeHeader(BitInputStream in) {
-
-		while (true) {
 			int bit = in.readBits(1);
 			
 			if (bit == -1) {
 				throw new HuffException("bad input, no PESEUDO_EOF");
 			}
-			//if (bit == PSEUDO_EOF) {
-				//throw new HuffException("break");
-			//}
 			if (bit == 0) {
-				HuffNode left = readTreeHeader(in).myLeft;
-				HuffNode right = readTreeHeader(in).myRight;
+				HuffNode left = readTreeHeader(in);
+				HuffNode right = readTreeHeader(in);
 				return new HuffNode(0, 0, left, right);
 			} else {
 				int value = in.readBits(BITS_PER_WORD + 1);
 				return new HuffNode(value, 0, null, null);
 			}
-			
-		}
 	}
 
 	public void readCompressedBits(HuffNode root, BitInputStream in, BitOutputStream out) {
@@ -148,11 +138,11 @@ public class HuffProcessor {
 					current = current.myRight;
 				}
 
-				if (current.myValue == 1) {
+				if (current.myLeft == null && current.myRight == null) {
 					if (current.myValue == PSEUDO_EOF)
 						break; // out of loop
 					else {
-						current.myValue = in.readBits(BITS_PER_WORD);
+						out.writeBits(BITS_PER_WORD, current.myValue);
 						current = root; // start back after leaf
 					}
 				}
