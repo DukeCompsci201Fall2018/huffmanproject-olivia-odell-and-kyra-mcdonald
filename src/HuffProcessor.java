@@ -69,7 +69,7 @@ public class HuffProcessor {
 	public HuffNode makeTreeFromCounts(int[] counts) {
 		PriorityQueue<HuffNode> pq = new PriorityQueue<>();
 
-		for (int i = 0; counts[i] > 0; i++) {
+		for (int i = 0; i < counts.length; i++) {
 			pq.add(new HuffNode(i, counts[i], null, null));
 		}
 
@@ -102,7 +102,7 @@ public class HuffProcessor {
 	}
 
 	public HuffNode writeHeader(HuffNode root, BitOutputStream out) {
-		if (root.myLeft != null || root.myRight != null) {
+		if (root.myLeft != null && root.myRight != null) {
 			out.writeBits(1, 0);
 			HuffNode left = writeHeader(root, out);
 			HuffNode right = writeHeader(root, out);
