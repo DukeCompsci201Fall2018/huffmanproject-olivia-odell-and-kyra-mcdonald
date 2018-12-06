@@ -91,7 +91,7 @@ public class HuffProcessor {
 
 	public void codingHelper(HuffNode root, String path, String[] encodings) {
 
-		if (root.myLeft == null && root.myRight == null) {
+		if (root.myLeft == null && root.myRight == null) { //if leaf node
 			encodings[root.myValue] = path;
 			return;
 		}
@@ -124,9 +124,9 @@ public class HuffProcessor {
 				String code = encoding[bits];
 				out.writeBits(code.length(), Integer.parseInt(code, 2));
 			}
-			String code = encoding[PSEUDO_EOF];
-			out.writeBits(code.length(), Integer.parseInt(code, 2));
 		}
+		String code = encoding[PSEUDO_EOF];
+		out.writeBits(code.length(), Integer.parseInt(code, 2));
 	}
 
 	/**
