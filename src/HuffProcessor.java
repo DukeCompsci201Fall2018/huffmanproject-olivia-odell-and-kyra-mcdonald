@@ -127,13 +127,15 @@ public class HuffProcessor {
 			if (bits == -1) {
 				break;
 			} else {
-				for (int i = 0; i < encoding.length; i++) {
-					String code = encoding[i];
+				//for (int i = 0; i < encoding.length; i++) {
+					String code = encoding[bits];
 					out.writeBits(code.length(), Integer.parseInt(code, 2));
-				}
-				String code = encoding[PSEUDO_EOF];
-				out.writeBits(code.length(), Integer.parseInt(code, 2));
+				//}
+				
 			}
+
+			String code = encoding[PSEUDO_EOF];
+			out.writeBits(code.length(), Integer.parseInt(code, 2));
 		}
 
 	}
