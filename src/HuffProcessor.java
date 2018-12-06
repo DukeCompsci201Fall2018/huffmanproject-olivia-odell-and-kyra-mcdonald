@@ -113,12 +113,6 @@ public class HuffProcessor {
 			out.writeBits(BITS_PER_WORD + 1, root.myValue);
 			return;
 		}
-		/*
-		 * if (root.myValue != 1) { //if internal node writeHeader(root, out);
-		 * writeHeader(root, out); if (root.myValue == PSEUDO_EOF) { throw new
-		 * HuffException("break"); } } else { out.writeBits(BITS_PER_WORD + 1,
-		 * root.myValue); }
-		 */
 	}
 
 	public void writeCompressedBits(String[] encoding, BitInputStream in, BitOutputStream out) {
@@ -127,17 +121,12 @@ public class HuffProcessor {
 			if (bits == -1) {
 				break;
 			} else {
-				//for (int i = 0; i < encoding.length; i++) {
-					String code = encoding[bits];
-					out.writeBits(code.length(), Integer.parseInt(code, 2));
-				//}
-				
+				String code = encoding[bits];
+				out.writeBits(code.length(), Integer.parseInt(code, 2));
 			}
-
 			String code = encoding[PSEUDO_EOF];
 			out.writeBits(code.length(), Integer.parseInt(code, 2));
 		}
-
 	}
 
 	/**
