@@ -49,7 +49,6 @@ public class HuffProcessor {
 		in.reset();
 		writeCompressedBits(codings, in, out);
 		out.close();
-
 	}
 
 	public int[] readForCounts(BitInputStream in) {
@@ -62,7 +61,6 @@ public class HuffProcessor {
 			values[chunk]++;
 
 		}
-		in.close();
 		return values;
 	}
 
@@ -70,7 +68,9 @@ public class HuffProcessor {
 		PriorityQueue<HuffNode> pq = new PriorityQueue<>();
 
 		for (int i = 0; i < counts.length; i++) {
-			pq.add(new HuffNode(i, counts[i], null, null));
+			if (counts[i] > 0) {
+				pq.add(new HuffNode(i, counts[i], null, null));
+			}
 		}
 
 		while (pq.size() > 1) {
@@ -90,8 +90,6 @@ public class HuffProcessor {
 	}
 
 	public void codingHelper(HuffNode root, String path, String[] encodings) {
-		if (root == null)
-			return; // base case
 
 		if (root.myLeft == null && root.myRight == null) {
 			encodings[root.myValue] = path;
@@ -101,24 +99,33 @@ public class HuffProcessor {
 		codingHelper(root.myRight, path + "1", encodings);
 	}
 
-	public HuffNode writeHeader(HuffNode root, BitOutputStream out) {
-		if (root.myLeft != null && root.myRight != null) {
+	public void writeHeader(HuffNode root, BitOutputStream out) {
+		// need a base case
+		if (root == null) {
+			return;
+		}
+		if (root.myLeft != null || root.myRight != null) { // if internal node
 			out.writeBits(1, 0);
-			HuffNode left = writeHeader(root, out);
-			HuffNode right = writeHeader(root, out);
-			return new HuffNode(0, 0, left, right);
-		} else {
+			writeHeader(root.myLeft, out);
+			writeHeader(root.myRight, out);
+		} else { // if leaf node
 			out.writeBits(1, 1);
 			out.writeBits(BITS_PER_WORD + 1, root.myValue);
-			return new HuffNode(root.myValue, 0, null, null);
+			return;
 		}
+		/*
+		 * if (root.myValue != 1) { //if internal node writeHeader(root, out);
+		 * writeHeader(root, out); if (root.myValue == PSEUDO_EOF) { throw new
+		 * HuffException("break"); } } else { out.writeBits(BITS_PER_WORD + 1,
+		 * root.myValue); }
+		 */
 	}
 
 	public void writeCompressedBits(String[] encoding, BitInputStream in, BitOutputStream out) {
 		while (true) {
 			int bits = in.readBits(BITS_PER_WORD);
 			if (bits == -1) {
-				throw new HuffException("bad input, no PSEUDO_EOF");
+				break;
 			} else {
 				for (int i = 0; i < encoding.length; i++) {
 					String code = encoding[i];
@@ -127,7 +134,6 @@ public class HuffProcessor {
 				String code = encoding[PSEUDO_EOF];
 				out.writeBits(code.length(), Integer.parseInt(code, 2));
 			}
-			out.close();
 		}
 
 	}
